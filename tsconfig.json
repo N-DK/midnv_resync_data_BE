@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "target": "es2016",
+        "module": "Node16",
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "moduleResolution": "Node16",
+        "outDir": "build"
+    },
+    "exclude": ["node_modules/"],
+    "include": ["src/**/*.ts", "src/utils/switch.js"]
+}
