@@ -48,42 +48,43 @@ import axios from 'axios';
 import fs from 'fs';
 
 const { PROCESS_BATCH_SIZE } = configureEnvironment();
-
+const IMEI = '089CE5A1DT';
 const resync = async () => {
-    try {
-        const database = new DatabaseModel();
-        const { conn: con } = await getConnection();
+    // try {
+    //     const database = new DatabaseModel();
+    //     const { conn: con } = await getConnection();
 
-        const { data } = await redisModel.hGet(
-            'number_of_devices_resynced',
-            `number_of_devices_resynced_${PROCESS_BATCH_SIZE}`,
-            'app.ts',
-            Date.now(),
-        );
+    //     const { data } = await redisModel.hGet(
+    //         'number_of_devices_resynced',
+    //         `number_of_devices_resynced_${PROCESS_BATCH_SIZE}`,
+    //         'app.ts',
+    //         Date.now(),
+    //     );
 
-        console.log('data redis in app.ts: ', data);
+    //     console.log('data redis in app.ts: ', data);
 
-        let res: any = await database.select(
-            con,
-            'tbl_device',
-            'id, imei',
-            'dev_id IS NOT NULL',
-            [],
-            'id',
-            'ASC',
-            data ? Number(data) : Number(PROCESS_BATCH_SIZE),
-            1000,
-        );
+    //     let res: any = await database.select(
+    //         con,
+    //         'tbl_device',
+    //         'id, imei',
+    //         'dev_id IS NOT NULL',
+    //         [],
+    //         'id',
+    //         'ASC',
+    //         data ? Number(data) : Number(PROCESS_BATCH_SIZE),
+    //         1000,
+    //     );
 
-        const imeis = res.map((item: any) => item.imei);
+    //     const imeis = res.map((item: any) => item.imei);
 
-        resyncService.resyncMultipleDevices(imeis);
+    //     resyncService.resyncMultipleDevices(imeis);
 
-        // when use 1 imei
-        // resyncService.resyncData('868683041000000');
-    } catch (error) {
-        console.log(error);
-    }
+    // } catch (error) {
+    //     console.log(error);
+    // }
+
+    // when use 1 imei
+    resyncService.resyncData(IMEI);
 
     // resyncService.resyncMultipleDevices(imeis);
 };
