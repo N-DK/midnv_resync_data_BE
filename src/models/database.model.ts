@@ -55,7 +55,7 @@ class DatabaseModel {
         data: any,
     ) {
         return await new Promise((resolve, reject) => {
-            const query = `INSERT IGNORE INTO ${tableName} (${fields}) VALUES (?)`;
+            const query = `INSERT IGNORE INTO ${tableName} (${fields}) VALUES ?`;
             db.query(query, [data], (err, dataRes: any) => {
                 if (err) {
                     console.log(err);

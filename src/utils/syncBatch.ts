@@ -14,29 +14,29 @@ export const syncBatch = async (
     databaseModel: DatabaseModel,
 ) => {
     try {
-        await Promise.all(
-            batch.map(async (item) => {
-                const { data: speedData = {} } = await axios.get(
-                    `${MAP_SERVER}/api/v1/check-way?lat=${item.latitude}&lng=${item.longitude}`,
-                );
+        const items: any = [];
 
-                item.max_speed = speedData.max_speed;
-                item.min_speed = speedData.min_speed;
+        for (const item of batch) {
+            const { data: speedData = {} } = await axios.get(
+                `${MAP_SERVER}/api/v1/check-way?lat=${item.latitude}&lng=${item.longitude}`,
+            );
 
-                const tableName = await saveTable(
-                    con,
-                    device[0].id,
-                    item.time * 1000,
-                );
+            item.max_speed = speedData.max_speed;
+            item.min_speed = speedData.min_speed;
 
-                await databaseModel.insertIgnore(
-                    con,
-                    tableName,
-                    FILED_TBL_GPS,
-                    Object.values(item),
-                );
-            }),
+            // Object.values(item)
+            items.push(Object.values(item));
+        }
+
+        const tableName = await saveTable(
+            con,
+            device[0].id,
+            batch[0].time * 1000,
         );
+
+        console.log(items.length);
+
+        await databaseModel.insertIgnore(con, tableName, FILED_TBL_GPS, items);
     } catch (error) {
         console.error('Error inserting data:', error);
     }
