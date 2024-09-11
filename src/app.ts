@@ -48,7 +48,7 @@ import axios from 'axios';
 import fs from 'fs';
 
 const { PROCESS_BATCH_SIZE } = configureEnvironment();
-const IMEI = '089CE5A1DT';
+const IMEI = '08F4A290FT';
 const resync = async () => {
     // try {
     //     const database = new DatabaseModel();
@@ -84,7 +84,11 @@ const resync = async () => {
     // }
 
     // when use 1 imei
+    console.time(`Time resync devices ${IMEI}`);
+
     resyncService.resyncData(IMEI);
+
+    console.timeEnd(`Time resync devices ${IMEI}`);
 
     // resyncService.resyncMultipleDevices(imeis);
 };
