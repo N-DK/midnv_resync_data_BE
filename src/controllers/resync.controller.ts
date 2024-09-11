@@ -11,6 +11,15 @@ class ResyncController {
             GET(res, data);
         } catch (error) {}
     }
+
+    async resyncData(req: any, res: any) {
+        try {
+            const { imei } = req.params;
+            await resyncService.resyncData(imei);
+
+            GET(res, 'Resync data success');
+        } catch (error) {}
+    }
 }
 
 export default new ResyncController();

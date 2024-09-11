@@ -86,14 +86,14 @@ const resync = async () => {
     // when use 1 imei
     console.time(`Time resync devices ${IMEI}`);
 
-    resyncService.resyncData(IMEI);
+    await resyncService.resyncData(IMEI);
 
     console.timeEnd(`Time resync devices ${IMEI}`);
 
     // resyncService.resyncMultipleDevices(imeis);
 };
 
-resync();
+// resync();
 
 // import routes
 import route from './routes';

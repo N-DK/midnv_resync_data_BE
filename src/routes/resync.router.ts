@@ -15,6 +15,12 @@ router.get(
     resyncController.getData,
 );
 
+router.get(
+    '/:imei',
+    [param('imei', constants.VALIDATE_DATA).isString()],
+    resyncController.resyncData,
+);
+
 export default (app: Express) => {
     app.use('/api/v1/resync', router);
 };
