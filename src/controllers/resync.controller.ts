@@ -1,4 +1,5 @@
 import { GET } from '../core/success.response';
+import catchAsync from '../helper/catchAsync.helper';
 import resyncService from '../services/resync.service';
 
 class ResyncController {
@@ -12,14 +13,14 @@ class ResyncController {
         } catch (error) {}
     }
 
-    async resyncData(req: any, res: any) {
-        try {
-            const { imei } = req.params;
-            await resyncService.resyncData(imei);
+    resyncData = catchAsync(async (req: any, res: any) => {
+        const { imei } = req.params;
+        const { start_time, end_time } = req.query;
 
-            GET(res, 'Resync data success');
-        } catch (error) {}
-    }
+        await resyncService.resyncData(imei, start_time, end_time);
+
+        GET(res, 'Resync data success');
+    });
 }
 
 export default new ResyncController();

@@ -50,45 +50,46 @@ import fs from 'fs';
 const { PROCESS_BATCH_SIZE } = configureEnvironment();
 const IMEI = '08F4A290FT';
 const resync = async () => {
-    // try {
-    //     const database = new DatabaseModel();
-    //     const { conn: con } = await getConnection();
+    try {
+        const database = new DatabaseModel();
+        const { conn: con } = await getConnection();
 
-    //     const { data } = await redisModel.hGet(
-    //         'number_of_devices_resynced',
-    //         `number_of_devices_resynced_${PROCESS_BATCH_SIZE}`,
-    //         'app.ts',
-    //         Date.now(),
-    //     );
+        const { data } = await redisModel.hGet(
+            'number_of_devices_resynced',
+            `number_of_devices_resynced_${PROCESS_BATCH_SIZE}`,
+            'app.ts',
+            Date.now(),
+        );
 
-    //     console.log('data redis in app.ts: ', data);
+        console.log('data redis in app.ts: ', data);
 
-    //     let res: any = await database.select(
-    //         con,
-    //         'tbl_device',
-    //         'id, imei',
-    //         'dev_id IS NOT NULL',
-    //         [],
-    //         'id',
-    //         'ASC',
-    //         data ? Number(data) : Number(PROCESS_BATCH_SIZE),
-    //         1000,
-    //     );
+        let res: any = await database.select(
+            con,
+            'tbl_device',
+            'id, imei',
+            'dev_id IS NOT NULL',
+            [],
+            'id',
+            'ASC',
+            0,
+            999999999,
+        );
 
-    //     const imeis = res.map((item: any) => item.imei);
+        console.log('res in app.ts: ', res.length);
 
-    //     resyncService.resyncMultipleDevices(imeis);
+        const imeis = res.map((item: any) => item.imei);
 
-    // } catch (error) {
-    //     console.log(error);
-    // }
+        resyncService.resyncMultipleDevices(imeis);
+    } catch (error) {
+        console.log(error);
+    }
 
     // when use 1 imei
-    console.time(`Time resync devices ${IMEI}`);
+    // console.time(`Time resync devices ${IMEI}`);
 
-    await resyncService.resyncData(IMEI);
+    // await resyncService.resyncData(IMEI);
 
-    console.timeEnd(`Time resync devices ${IMEI}`);
+    // console.timeEnd(`Time resync devices ${IMEI}`);
 
     // resyncService.resyncMultipleDevices(imeis);
 };

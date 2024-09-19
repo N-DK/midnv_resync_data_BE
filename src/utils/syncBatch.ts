@@ -34,10 +34,9 @@ export const syncBatch = async (
             batch[0].time * 1000,
         );
 
-        console.log(items.length);
-
         await databaseModel.insertIgnore(con, tableName, FILED_TBL_GPS, items);
     } catch (error) {
-        console.error('Error inserting data:', error);
+        console.log('Error sync batch: ', error);
+        throw error;
     }
 };

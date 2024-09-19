@@ -2,9 +2,9 @@ import { getConnection } from '../dbs/init.mysql';
 import resyncModel from '../models/resync.model';
 
 class ResyncService {
-    async resyncData(imei: string) {
+    async resyncData(imei: string, start_time = 0, end_time = 0) {
         const { conn: con } = await getConnection();
-        return resyncModel.resyncData(con, imei);
+        return resyncModel.resyncData(con, imei, start_time, end_time);
     }
 
     async resyncMultipleDevices(imeis: string[]) {

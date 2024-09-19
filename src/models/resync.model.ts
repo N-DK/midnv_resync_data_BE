@@ -7,6 +7,7 @@ import { setting } from '../constants/setting.constant';
 import configureEnvironment from '../config/dotenv.config';
 import { fork } from 'child_process';
 import redisModel from './redis.model';
+import fs from 'fs';
 
 const { BATCH_SIZE, TIME_SEND, PROCESS_BATCH_SIZE } = configureEnvironment();
 
@@ -17,22 +18,66 @@ class ResyncModel extends DatabaseModel {
         super();
     }
 
-    async resyncData(con: PoolConnection, imei: string): Promise<boolean> {
+    async resyncData(
+        con: PoolConnection,
+        imei: string,
+        start_time = 0,
+        end_time = 0,
+    ): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             try {
-                const { data, device } = await getData(con, imei, this);
+                const { data, device } = await getData(
+                    con,
+                    imei,
+                    this,
+                    start_time,
+                    end_time,
+                );
 
                 const interval = setInterval(async () => {
-                    console.time(`Time resync data ${imei}`);
-                    const batch = data.splice(0, Number(BATCH_SIZE));
-                    if (batch.length === 0) {
-                        clearInterval(interval);
+                    try {
+                        console.time(`Time resync data ${imei}`);
+                        const batch = data.splice(0, Number(BATCH_SIZE));
+                        if (batch.length === 0) {
+                            clearInterval(interval);
+                            console.timeEnd(`Time resync data ${imei}`);
+                            resolve(true);
+                            return;
+                        }
+                        await syncBatch(con, batch, device, this);
+                        if (fs.existsSync('./src/common/resync.txt')) {
+                            // if file resync.txt exists, read file and resync data and get imei from file
+                            const imeis_resync = fs
+                                .readFileSync('./src/common/resync.txt', 'utf8')
+                                .split('\n');
+                            // xóa phần tử imei trong imeis_resync
+                            const index = imeis_resync.indexOf(imei);
+                            if (index > -1) {
+                                imeis_resync.splice(index, 1);
+                            }
+                            // ghi lại vào file resync.txt
+                            fs.writeFileSync(
+                                './src/common/resync.txt',
+                                imeis_resync.join('\n'),
+                            );
+                        }
                         console.timeEnd(`Time resync data ${imei}`);
-                        resolve(true);
-                        return;
+                    } catch (error) {
+                        if (!fs.existsSync('./src/common/resync.txt')) {
+                            fs.writeFileSync('./src/common/resync.txt', '');
+                        }
+                        // thêm không trùng imei vào file resync.txt
+                        if (
+                            !fs
+                                .readFileSync('./src/common/resync.txt', 'utf8')
+                                .includes(imei)
+                        ) {
+                            fs.appendFileSync(
+                                './src/common/resync.txt',
+                                `${imei}\n`,
+                            );
+                        }
                     }
-                    await syncBatch(con, batch, device, this);
-                    console.timeEnd(`Time resync data ${imei}`);
                 }, Number(TIME_SEND));
             } catch (error: any) {
                 console.error('Error resync data: ', error.message);
@@ -112,6 +157,17 @@ class ResyncModel extends DatabaseModel {
             } catch (error) {
                 console.error('Error handling Redis operations:', error);
             }
+        }
+
+        // get data from resync.txt vào gọi lại hàm resyncData với imeis
+        const imeis_resync = fs
+            .readFileSync('./src/common/resync.txt', 'utf8')
+            .split('\n');
+        if (imeis_resync.length > 0) {
+            await this.resyncMultipleDevices(con, imeis_resync);
+        } else {
+            // delete file resync.txt
+            fs.unlinkSync('./src/common/resync.txt');
         }
     }
 

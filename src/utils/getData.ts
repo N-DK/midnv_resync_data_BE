@@ -9,6 +9,8 @@ export const getData = async (
     con: PoolConnection,
     imei: string,
     databaseModel: DatabaseModel,
+    start_time = 0,
+    end_time = 0,
 ) => {
     try {
         // Fetch data from API
@@ -63,6 +65,15 @@ export const getData = async (
         // Format the data
         data = await formatData(data);
 
+        // tìm items trong data khoảng start_time đến end_time
+        console.log('start_time: ', start_time);
+        console.log('end_time: ', end_time);
+
+        if (start_time > 0 && end_time > 0) {
+            data = data.filter(
+                (item: any) => item.time >= start_time && item.time <= end_time,
+            );
+        }
         return { data, device };
     } catch (error) {
         console.error('Error in getData function:', error);
